@@ -26,10 +26,10 @@ import com.aaron.walkcore.ui.theme.WalkcoreTheme
 import com.aaron.walkcore.ui.theme.White
 
 @Composable
-fun HeaderComponent(
+fun AppHeader(
     modifier: Modifier = Modifier,
+    currency: Long,
     isColored: Boolean = false,
-    //weatherViewModel: WeatherViewModel = viewModel()
 ) {
     /* ==============================
     ========== VARIABLES ==========
@@ -103,8 +103,8 @@ fun HeaderComponent(
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun HomeScreenPreview() {
+fun AppHeaderPreview() {
     WalkcoreTheme {
-        HeaderComponent(isColored = true)
+        AppHeader(currency = 10000, isColored = true)
     }
 }
