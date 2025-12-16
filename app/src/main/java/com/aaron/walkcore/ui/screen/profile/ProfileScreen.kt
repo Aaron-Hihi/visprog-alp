@@ -1,4 +1,4 @@
-package com.aaron.walkcore.ui.screen
+package com.aaron.walkcore.ui.screen.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
