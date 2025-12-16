@@ -58,7 +58,6 @@ val Typography = Typography(
         fontFamily = GeoramaFontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
-        lineHeight = 24.sp,
         letterSpacing = 0.5.sp,
     ),
 
@@ -66,7 +65,6 @@ val Typography = Typography(
         fontFamily = GeoramaFontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
-        lineHeight = 24.sp,
         letterSpacing = 0.5.sp,
     ),
 
@@ -74,7 +72,7 @@ val Typography = Typography(
         fontFamily = GeoramaFontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 10.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
+        letterSpacing = 0.5.sp,
+        color = DarkGrey2
     )
 )
