@@ -89,7 +89,7 @@ object UserDummy {
 
     // Dummy user with high step count, representing a pro athlete.
     val UserSimplePro = UserSimpleModel(
-        id = "user_001",
+        id = "user_002",
         username = "Alex_Walker_Pro",
         stepsWalked = 18500,
         profilePictureUrl = "https://picsum.photos/400/400?random=101",
@@ -97,7 +97,7 @@ object UserDummy {
 
     // Dummy user with moderate steps, showing typical daily activity.
     val UserSimpleRegular = UserSimpleModel(
-        id = "user_002",
+        id = "user_003",
         username = "Rara_Anggraini",
         stepsWalked = 8750,
         profilePictureUrl = "https://picsum.photos/400/400?random=102",
@@ -105,7 +105,7 @@ object UserDummy {
 
     // Dummy user with low steps, representing a beginner or inactive day.
     val UserSimpleBeginner = UserSimpleModel(
-        id = "user_003",
+        id = "user_004",
         username = "Tito_Pratama_ID",
         stepsWalked = 3120,
         profilePictureUrl = "https://picsum.photos/400/400?random=103",

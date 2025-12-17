@@ -38,6 +38,7 @@ fun SessionOverviewComponent(
     modifier: Modifier = Modifier,
     showDescription: Boolean = true,
     sessionOverview: SessionOverviewModel,
+    fixedHeight: Boolean = true
 ) {
     /* ==============================
     ========== VARIABLES ==========
@@ -48,14 +49,14 @@ fun SessionOverviewComponent(
     ========== UI LAYOUT ==========
     ============================== */
     // --- View Vars ---
-    val fixedTextContentHeight = 300.dp
+    val fixedTextContentHeight = 150.dp
 
 
     // --- Layout ---
 
     Column(
         modifier = modifier
-            .fillMaxSize(),
+            .fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -87,9 +88,11 @@ fun SessionOverviewComponent(
 
         // All text and infos
         Column(
-            modifier = Modifier
-                .height(fixedTextContentHeight)
-                .fillMaxWidth(),
+            modifier = if (fixedHeight) Modifier
+                    .height(fixedTextContentHeight)
+                    .fillMaxWidth()
+                else Modifier
+                    .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

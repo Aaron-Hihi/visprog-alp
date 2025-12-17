@@ -33,4 +33,10 @@ object SessionOverviewDummy {
         imageUrl = null,
         locationName = "Area CFD Sudirman, Jakarta"
     )
+
+    val allSessions = listOf<SessionOverviewModel>(
+        SessionDummyFull,
+        SessionDummyRemote,
+        SessionDummyMinimal
+    )
 }

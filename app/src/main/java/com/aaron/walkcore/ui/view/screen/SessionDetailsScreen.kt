@@ -24,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -34,7 +33,7 @@ import coil.compose.AsyncImage
 import com.aaron.walkcore.R
 import com.aaron.walkcore.data.dummy.SessionDummy
 import com.aaron.walkcore.model.session.SessionDetailsModel
-import com.aaron.walkcore.ui.theme.Blue
+import com.aaron.walkcore.ui.theme.BlueToGreen
 import com.aaron.walkcore.ui.theme.Green
 import com.aaron.walkcore.ui.theme.LightGrey
 import com.aaron.walkcore.ui.theme.WalkcoreTheme
@@ -51,7 +50,7 @@ fun SessionDetailsScreen(
     ========== VARIABLES ==========
     ============================== */
     var isLoadingImage by remember { mutableStateOf(true) }
-    var scrollState = rememberScrollState()
+    val scrollState = rememberScrollState()
 
     /* ==============================
     ========== UI LAYOUT ==========
@@ -155,18 +154,15 @@ fun SessionDetailsScreen(
 
             // Button to join
             ButtonComponent(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(32.dp),
                 onClick = { /*TODO*/ },
                 label = "Join Now",
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        Blue,
-                        Green
-                    )
-                )
+                brush = BlueToGreen,
             )
 
             // --- Metadata ---
-
             Spacer(
                 modifier = Modifier
                     .height(4.dp)

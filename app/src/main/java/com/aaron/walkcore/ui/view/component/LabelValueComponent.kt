@@ -57,15 +57,15 @@ fun LabelValueComponent(
                 brush = brush,
                 shape = RoundedCornerShape(16.dp)
             )
-            .height(boxHeight),
+            .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
 
         // Layout (Downwards)
         Column (
             modifier = Modifier
-                .padding(10.dp)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
