@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -21,7 +22,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import com.aaron.walkcore.ui.theme.Blue
+import com.aaron.walkcore.ui.theme.Green
 import com.aaron.walkcore.ui.theme.WalkcoreTheme
+import com.aaron.walkcore.ui.theme.White
 import java.time.YearMonth
 
 // ==========================
@@ -77,17 +81,27 @@ private fun ScheduleHeader() {
         modifier = Modifier
             .fillMaxWidth()
             .height(160.dp)
-            .background(MaterialTheme.colorScheme.primary),
-        contentAlignment = Alignment.Center
+            .background(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(
+                        Blue,
+                        Green
+                    )
+                )
+            )
+            .padding(horizontal = 16.dp),
+        contentAlignment = Alignment.CenterStart
     ) {
         Text(
             text = "Schedule",
-            color = Color.White,
-            fontSize = 20.sp,
+            color = White,
+            fontSize = 22.sp,
             fontWeight = FontWeight.SemiBold
         )
     }
 }
+
+
 
 // ==========================
 // SET CALENDAR BUTTON
@@ -99,11 +113,22 @@ private fun SetCalendarButton(
     Button(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Blue,
+            contentColor = White
+        ),
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = 4.dp
+        )
     ) {
-        Text("Set Calendar")
+        Text(
+            text = "Set Calendar",
+            fontWeight = FontWeight.SemiBold
+        )
     }
 }
+
 
 // ==========================
 // POPUP (FIXED & VISIBLE)
@@ -150,8 +175,15 @@ fun AddSchedulePopup(
                         Text("Sync ", fontSize = 12.sp)
                         Switch(
                             checked = syncGoogleCalendar,
-                            onCheckedChange = { syncGoogleCalendar = it }
+                            onCheckedChange = { syncGoogleCalendar = it },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = White,
+                                checkedTrackColor = Blue,
+                                uncheckedThumbColor = White,
+                                uncheckedTrackColor = Color.LightGray
+                            )
                         )
+
                     }
                 }
 
@@ -168,10 +200,14 @@ fun AddSchedulePopup(
                 Button(
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(10.dp)
-                ) {
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Blue,
+                        contentColor = White)
+                ){
                     Text("Tutup")
                 }
+
             }
         }
     }
@@ -280,10 +316,19 @@ fun ScheduleDetailPopup(
                             // nanti logic simpan
                             onDismiss()
                         },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Green,
+                            contentColor = White
+                        )
                     ) {
-                        Text("Apply")
+                        Text(
+                            text = "Apply",
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
+
                 }
             }
         }
