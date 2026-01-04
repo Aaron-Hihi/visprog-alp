@@ -1,6 +1,7 @@
 package com.aaron.walkcore.ui.screen.schedule
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -11,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -23,29 +25,45 @@ import com.aaron.walkcore.ui.theme.WalkcoreTheme
 import java.time.YearMonth
 
 // ==========================
-// MAIN SCREEN
+// MAIN SCREEN (FIXED)
 // ==========================
 @Composable
 fun ScheduleScreen() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-    ) {
 
-        ScheduleHeader()
+    var showPopup by remember { mutableStateOf(false) }
 
-        Column(modifier = Modifier.padding(16.dp)) {
+    Box(modifier = Modifier.fillMaxSize()) {
 
-            SetCalendarButton()
+        // ===== MAIN CONTENT =====
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
 
-            Spacer(modifier = Modifier.height(16.dp))
+            ScheduleHeader()
 
-            SwipeableCalendar()
+            Column(modifier = Modifier.padding(16.dp)) {
 
-            Spacer(modifier = Modifier.height(16.dp))
+                SetCalendarButton(
+                    onClick = { showPopup = true }
+                )
 
-            UpcomingScheduleCard()
+                Spacer(modifier = Modifier.height(16.dp))
+
+                SwipeableCalendar()
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                UpcomingScheduleCard()
+            }
+        }
+
+        // ===== POPUP LAYER (TOP MOST) =====
+        if (showPopup) {
+            AddSchedulePopup(
+                onDismiss = { showPopup = false }
+            )
         }
     }
 }
@@ -75,76 +93,121 @@ private fun ScheduleHeader() {
 // SET CALENDAR BUTTON
 // ==========================
 @Composable
-private fun SetCalendarButton() {
-    var showPopup by remember { mutableStateOf(false) }
-
+private fun SetCalendarButton(
+    onClick: () -> Unit
+) {
     Button(
-        onClick = { showPopup = true },
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp)
     ) {
         Text("Set Calendar")
     }
+}
 
-    if (showPopup) {
-        AddSchedulePopup(
-            onDismiss = { showPopup = false }
+// ==========================
+// POPUP (FIXED & VISIBLE)
+// ==========================
+@Composable
+fun AddSchedulePopup(
+    onDismiss: () -> Unit
+) {
+    var showDetail by remember { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf("") }
+    var syncGoogleCalendar by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.45f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(10.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Tambah Jadwal",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Sync ", fontSize = 12.sp)
+                        Switch(
+                            checked = syncGoogleCalendar,
+                            onCheckedChange = { syncGoogleCalendar = it }
+                        )
+                    }
+                }
+
+                Divider()
+
+                // Calendar UI (simple)
+                CalendarGrid(
+                    onDateSelected = {
+                        selectedDate = it
+                        showDetail = true
+                    }
+                )
+
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text("Tutup")
+                }
+            }
+        }
+    }
+
+    if (showDetail) {
+        ScheduleDetailPopup(
+            date = selectedDate,
+            onDismiss = { showDetail = false }
         )
     }
 }
 
-// ==========================
-// ADD SCHEDULE POPUP
-// ==========================
+
 @Composable
-private fun AddSchedulePopup(
-    onDismiss: () -> Unit
+fun CalendarGrid(
+    onDateSelected: (String) -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.4f))
-            .padding(24.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Popup(
-            alignment = Alignment.Center,
-            properties = PopupProperties(
-                dismissOnBackPress = true,
-                dismissOnClickOutside = true
-            ),
-            onDismissRequest = onDismiss
-        ) {
+    val days = (1..30).toList()
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(8.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-
-                    Text(
-                        text = "Tambah Jadwal",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-                    ScheduleOptionButton("📅 Jadwal Harian")
-                    ScheduleOptionButton("🏃 Jadwal Olahraga")
-                    ScheduleOptionButton("🍽 Jadwal Makan")
-                    ScheduleOptionButton("⏰ Custom Jadwal")
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Button(
-                        onClick = onDismiss,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(10.dp)
+    Column {
+        days.chunked(7).forEach { week ->
+            Row(modifier = Modifier.fillMaxWidth()) {
+                week.forEach { day ->
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(4.dp)
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                            .clickable {
+                                onDateSelected("2026-01-$day")
+                            },
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text("Tutup")
+                        Text(day.toString())
                     }
                 }
             }
@@ -152,15 +215,89 @@ private fun AddSchedulePopup(
     }
 }
 
+
+@Composable
+fun ScheduleDetailPopup(
+    date: String,
+    onDismiss: () -> Unit
+) {
+    var time by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.45f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(10.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+
+                Text(
+                    text = "Detail Jadwal",
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp
+                )
+
+                Text("Tanggal: $date", fontSize = 14.sp)
+
+                OutlinedTextField(
+                    value = time,
+                    onValueChange = { time = it },
+                    label = { Text("Waktu (contoh: 07:00)") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = { Text("Deskripsi") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Cancel")
+                    }
+
+                    Button(
+                        onClick = {
+                            // nanti logic simpan
+                            onDismiss()
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Apply")
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 // ==========================
 // OPTION BUTTON
 // ==========================
 @Composable
-private fun ScheduleOptionButton(
-    text: String
-) {
+private fun ScheduleOptionButton(text: String) {
     OutlinedButton(
-        onClick = { /* logic nanti */ },
+        onClick = {},
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp)
     ) {
@@ -173,7 +310,6 @@ private fun ScheduleOptionButton(
 // ==========================
 @Composable
 private fun SwipeableCalendar() {
-
     val baseMonth = remember { YearMonth.now() }
 
     LazyRow(
@@ -182,8 +318,7 @@ private fun SwipeableCalendar() {
         contentPadding = PaddingValues(horizontal = 8.dp)
     ) {
         items((0 until 24).toList()) { index ->
-            val yearMonth = baseMonth.plusMonths(index.toLong())
-            CalendarCard(yearMonth)
+            CalendarCard(baseMonth.plusMonths(index.toLong()))
         }
     }
 }
@@ -198,12 +333,8 @@ private fun CalendarCard(yearMonth: YearMonth) {
         .lowercase()
         .replaceFirstChar { it.uppercase() }
 
-    val daysInMonth = yearMonth.lengthOfMonth()
-
     Card(
-        modifier = Modifier
-            .width(300.dp)
-            .wrapContentHeight(),
+        modifier = Modifier.width(300.dp),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -214,11 +345,9 @@ private fun CalendarCard(yearMonth: YearMonth) {
                 fontWeight = FontWeight.SemiBold
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            CalendarWeekHeader()
             Spacer(modifier = Modifier.height(8.dp))
-            CalendarGrid(daysInMonth)
+            CalendarWeekHeader()
+            CalendarGrid(yearMonth.lengthOfMonth())
         }
     }
 }
@@ -234,8 +363,7 @@ private fun CalendarWeekHeader() {
                 text = it,
                 modifier = Modifier.weight(1f),
                 fontSize = 12.sp,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Medium
+                textAlign = TextAlign.Center
             )
         }
     }
@@ -247,17 +375,13 @@ private fun CalendarWeekHeader() {
 @Composable
 private fun CalendarGrid(daysInMonth: Int) {
 
-    val days = (1..daysInMonth).toList()
-
-    BoxWithConstraints(
-        modifier = Modifier.fillMaxWidth()
-    ) {
+    BoxWithConstraints {
         val cellSize = maxWidth / 7
 
         Column {
-            days.chunked(7).forEach { week ->
+            (1..daysInMonth).chunked(7).forEach { week ->
                 Row {
-                    week.forEach { day ->
+                    week.forEach {
                         Box(
                             modifier = Modifier
                                 .size(cellSize)
@@ -268,16 +392,8 @@ private fun CalendarGrid(daysInMonth: Int) {
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(day.toString())
+                            Text(it.toString())
                         }
-                    }
-
-                    repeat(7 - week.size) {
-                        Spacer(
-                            modifier = Modifier
-                                .size(cellSize)
-                                .padding(4.dp)
-                        )
                     }
                 }
             }
@@ -286,24 +402,14 @@ private fun CalendarGrid(daysInMonth: Int) {
 }
 
 // ==========================
-// UPCOMING SCHEDULE
+// UPCOMING
 // ==========================
 @Composable
 private fun UpcomingScheduleCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
+    Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
-
-            Text(
-                text = "Upcoming Schedule",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
+            Text("Upcoming Schedule", fontWeight = FontWeight.SemiBold)
+            Spacer(modifier = Modifier.height(8.dp))
             ScheduleItem("Morning Walk", "06:00 AM")
             ScheduleItem("Evening Jog", "05:30 PM")
             ScheduleItem("Mukbang Run", "07:00 PM")
@@ -314,9 +420,7 @@ private fun UpcomingScheduleCard() {
 @Composable
 private fun ScheduleItem(title: String, time: String) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(title)
