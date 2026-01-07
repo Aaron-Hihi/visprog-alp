@@ -3,8 +3,10 @@ package com.aaron.walkcore.ui.view.screen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -15,8 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.aaron.walkcore.data.dummy.SessionOverviewDummy
 import com.aaron.walkcore.data.dummy.UserDummy
+import com.aaron.walkcore.route.AppView
 import com.aaron.walkcore.ui.theme.Blue
 import com.aaron.walkcore.ui.theme.WalkcoreTheme
 import com.aaron.walkcore.ui.theme.YellowToBlue
@@ -30,6 +35,7 @@ import com.aaron.walkcore.ui.view.component.user.ListUserSimpleComponent
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
+    navController: NavHostController
 ) {
     /* ==============================
     ========== VARIABLES ==========
@@ -84,7 +90,13 @@ fun HomeScreen(
         // Running event
         OngoingSessionOverviewComponent(
             sessionOverview = SessionOverviewDummy.SessionDummyFull,
-            onClick = { /*TODO*/ }
+            onCardClick = {
+                val id = SessionOverviewDummy.SessionDummyFull.id
+                navController.navigate("${AppView.SESSION_DETAILS.name}/$id")
+            },
+            onButtonClick = {
+                // TODO: Start session
+            }
         )
 
         // Upcoming Sessions
@@ -94,7 +106,9 @@ fun HomeScreen(
             button = {
                 ButtonComponent(
                     label = "See Schedule",
-                    onClick = {},
+                    onClick = {
+                        // TODO: navController.navigate("schedule") @Ricky
+                    },
                     color = Blue
                 )
             }
@@ -109,7 +123,9 @@ fun HomeScreen(
             button = {
                 ButtonComponent(
                     label = "See More",
-                    onClick = {},
+                    onClick = {
+                        // TODO: navigate("friends")
+                    },
                     color = Blue
                 )
             },
@@ -120,10 +136,15 @@ fun HomeScreen(
         ListSessionOverviewComponent(
             title = "Explore Events",
             sessionsList = SessionOverviewDummy.allSessions,
+            onCardClick = { session ->
+                navController.navigate("${AppView.SESSION_DETAILS.name}/${session.id}")
+            },
             button = {
                 ButtonComponent(
                     label = "Explore More",
-                    onClick = {},
+                    onClick = {
+                        // TODO: navigate("browse") @Jermy
+                    },
                     color = Blue
                 )
             }
@@ -133,6 +154,9 @@ fun HomeScreen(
         ListSessionOverviewComponent(
             title = "From your Friends",
             sessionsList = SessionOverviewDummy.allSessions,
+            onCardClick = { session ->
+                navController.navigate("${AppView.SESSION_DETAILS.name}/${session.id}")
+            },
             button = {
                 ButtonComponent(
                     label = "Explore More",
@@ -142,8 +166,10 @@ fun HomeScreen(
             }
         )
 
-
-
+        Spacer(
+            modifier = Modifier
+                .height(24.dp)
+        )
     }
 }
 
@@ -152,7 +178,6 @@ fun HomeScreen(
 @Composable
 fun HomeScreenPreview() {
     WalkcoreTheme {
-        HomeScreen(
-        )
+        HomeScreen(navController = rememberNavController())
     }
 }

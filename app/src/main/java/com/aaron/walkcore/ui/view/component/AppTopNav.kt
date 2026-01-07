@@ -2,15 +2,18 @@ package com.aaron.walkcore.ui.view.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Inbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,16 +22,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aaron.walkcore.route.AppView
 import com.aaron.walkcore.ui.theme.Black
-import com.aaron.walkcore.ui.theme.Blue
-import com.aaron.walkcore.ui.theme.Green
+import com.aaron.walkcore.ui.theme.BlueToGreen
 import com.aaron.walkcore.ui.theme.WalkcoreTheme
 import com.aaron.walkcore.ui.theme.White
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppHeader(
+fun AppTopNav(
     modifier: Modifier = Modifier,
-    currency: Long,
+    currentView: AppView?,
+    canNavigateBack: Boolean,
+    navigateUp: () -> Unit,
+    currency: Long = 0,
     isColored: Boolean = false,
 ) {
     /* ==============================
@@ -45,9 +52,7 @@ fun AppHeader(
 
     // --- Header Background Color ---
     val headerBrush: Brush = if (isColored) {
-        Brush.horizontalGradient(
-            colors = listOf(Blue, Green)
-        )
+        BlueToGreen
     } else {
         SolidColor(Color.Transparent)
     }
@@ -55,56 +60,54 @@ fun AppHeader(
     // --- Layout ---
 
     // Background
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(brush = headerBrush)
-            .padding(horizontal = 16.dp, vertical = 32.dp)
-    ) {
+    val contentColor = if (isColored) White else Black
 
-        // Top row: Title, Currency, Mail
-        Row (
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            // Title
+    // Top app bar template
+    TopAppBar(
+        modifier = modifier.background(brush = headerBrush),
+
+        navigationIcon = {
+            if (canNavigateBack) {
+                IconButton(onClick = navigateUp) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = contentColor
+                    )
+                }
+            }
+        },
+
+        title = {
             Text(
-                text = "WALKCORE",
-                color = if (isColored) White else Black,
+                text = currentView?.title ?: "WALKCORE",
+                color = contentColor,
                 style = MaterialTheme.typography.headlineLarge
             )
+        },
 
-            // Row for currency and mail
-            Row (
+        actions = {
+            Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(
-                    space = 8.dp,
-                    alignment = Alignment.CenterHorizontally
-                ),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(end = 16.dp)
             ) {
-                // Currency
                 Text(
-                    text = "$ 10000", // TODO: Change to viewmodel data
-                    color = if (isColored) White else Black,
+                    text = "$ $currency",
+                    color = contentColor,
                     style = MaterialTheme.typography.bodyLarge
                 )
 
-                // Mail Icon
                 Icon(
                     imageVector = Icons.Default.Inbox,
                     contentDescription = "Mail Icon",
-                    tint = if (isColored) White else Black
+                    tint = contentColor
                 )
             }
-        }
-    }
-}
+        },
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun AppHeaderPreview() {
-    WalkcoreTheme {
-        AppHeader(currency = 10000, isColored = true)
-    }
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent
+        )
+    )
 }
