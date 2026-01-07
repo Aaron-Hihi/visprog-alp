@@ -2,6 +2,7 @@ package com.aaron.walkcore.ui.view.component.session
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -29,23 +30,20 @@ fun ListSessionOverviewComponent(
     sessionsList: List<SessionOverviewModel>,
     onCardClick: (SessionOverviewModel) -> Unit = {}
 ) {
-
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.Start
     ) {
-
-        // Top row if title nor button is null
+        // Padded header section for title and action button
         if (title != null || button != null) {
             Row (
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
             ) {
-
-                // Title
                 if (title != null) {
                     Text(
                         text = title,
@@ -57,17 +55,17 @@ fun ListSessionOverviewComponent(
                     )
                 }
 
-                // Button
                 if (button != null) {
                     button()
                 }
             }
         }
 
-        // Lazy row to show all sessions
+        // Horizontal list with edge-to-edge scrolling via contentPadding
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
             items(
                 items = sessionsList,
@@ -80,18 +78,17 @@ fun ListSessionOverviewComponent(
                 )
             }
 
-            // If session is empty
             if (sessionsList.isEmpty()) {
                 item {
                     Text(
                         text = "No sessions found",
-                        modifier = Modifier.padding(16.dp))
+                        modifier = Modifier.padding(16.dp)
+                    )
                 }
             }
         }
     }
 }
-
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
@@ -106,8 +103,7 @@ fun ListSessionOverviewPreview() {
                     color = Blue
                 )
             },
-            sessionsList = SessionOverviewDummy.allSessions,
-            modifier = Modifier.padding(16.dp)
+            sessionsList = SessionOverviewDummy.allSessions
         )
     }
 }

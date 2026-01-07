@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -32,7 +33,6 @@ import com.aaron.walkcore.ui.view.component.session.ListSessionOverviewComponent
 import com.aaron.walkcore.ui.view.component.session.OngoingSessionOverviewComponent
 import com.aaron.walkcore.ui.view.component.user.ListUserSimpleComponent
 
-
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
@@ -40,23 +40,27 @@ fun HomeScreen(
 ) {
     val scrollState = rememberScrollState()
 
+    // Main scroll container without global horizontal padding to allow lists to reach edges
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(scrollState),
-        verticalArrangement = Arrangement.spacedBy(40.dp),
+        verticalArrangement = Arrangement.spacedBy(60.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Welcome message header
+        // Welcome message with specific padding
         Text(
             text = "Hello, Jermy!",
             style = MaterialTheme.typography.headlineLarge,
             textAlign = TextAlign.Start,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
         )
 
-        // Activity metrics row
+        // Statistics row with specific padding
         Row(
+            modifier = Modifier.padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -75,19 +79,21 @@ fun HomeScreen(
             )
         }
 
-        // Active session highlight
-        OngoingSessionOverviewComponent(
-            sessionOverview = SessionOverviewDummy.SessionDummyFull,
-            onCardClick = {
-                val id = SessionOverviewDummy.SessionDummyFull.id
-                if (id.isNotEmpty()) {
-                    navController.navigate("${AppView.SESSION_DETAILS.name}/$id")
-                }
-            },
-            onButtonClick = { }
-        )
+        // Feature card for active sessions
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            OngoingSessionOverviewComponent(
+                sessionOverview = SessionOverviewDummy.SessionDummyFull,
+                onCardClick = {
+                    val id = SessionOverviewDummy.SessionDummyFull.id
+                    if (id.isNotEmpty()) {
+                        navController.navigate("${AppView.SESSION_DETAILS.name}/$id")
+                    }
+                },
+                onButtonClick = { }
+            )
+        }
 
-        // Upcoming user events list
+        // Horizontal lists: Title/Button stay padded, scrollable content hits edges
         ListSessionOverviewComponent(
             title = "Upcoming Events",
             sessionsList = SessionOverviewDummy.allSessions,
@@ -97,28 +103,18 @@ fun HomeScreen(
                 }
             },
             button = {
-                ButtonComponent(
-                    label = "See Schedule",
-                    onClick = { },
-                    color = Blue
-                )
+                ButtonComponent(label = "See Schedule", onClick = { }, color = Blue)
             }
         )
 
-        // Friends list display
         ListUserSimpleComponent(
             title = "Your Friends",
             button = {
-                ButtonComponent(
-                    label = "See More",
-                    onClick = { },
-                    color = Blue
-                )
+                ButtonComponent(label = "See More", onClick = { }, color = Blue)
             },
             userSimpleModels = UserDummy.AllSimpleUsers
         )
 
-        // Global event exploration
         ListSessionOverviewComponent(
             title = "Explore Events",
             sessionsList = SessionOverviewDummy.allSessions,
@@ -128,15 +124,10 @@ fun HomeScreen(
                 }
             },
             button = {
-                ButtonComponent(
-                    label = "Explore More",
-                    onClick = { },
-                    color = Blue
-                )
+                ButtonComponent(label = "Explore More", onClick = { }, color = Blue)
             }
         )
 
-        // Friend activity feed
         ListSessionOverviewComponent(
             title = "From your Friends",
             sessionsList = SessionOverviewDummy.allSessions,
@@ -146,20 +137,15 @@ fun HomeScreen(
                 }
             },
             button = {
-                ButtonComponent(
-                    label = "Explore More",
-                    onClick = {},
-                    color = Blue
-                )
+                ButtonComponent(label = "Explore More", onClick = {}, color = Blue)
             }
         )
 
-        // Bottom spacing for scroll clarity
+        // Bottom spacer for scroll clearance
         Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
-// Component preview configuration
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun HomeScreenPreview() {

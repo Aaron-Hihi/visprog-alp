@@ -2,6 +2,7 @@ package com.aaron.walkcore.ui.view.component.user
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,7 +17,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aaron.walkcore.data.dummy.UserDummy
-import com.aaron.walkcore.model.session.SessionOverviewModel
 import com.aaron.walkcore.model.user.UserSimpleModel
 import com.aaron.walkcore.ui.theme.WalkcoreTheme
 
@@ -27,29 +27,22 @@ fun ListUserSimpleComponent(
     button: (@Composable () -> Unit)? = null,
     userSimpleModels: List<UserSimpleModel>
 ) {
-    /* ==============================
-    ========== UI LAYOUT ==========
-    ============================== */
-    // --- Vars ---
     val displayedUsers = userSimpleModels.take(20)
 
-    // --- Layout ---
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.Start
     ) {
-
-        // Top row if title nor button is null
+        // Header alignment matching global app padding
         if (title != null || button != null) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
             ) {
-
-                // Title
                 if (title != null) {
                     Text(
                         text = title,
@@ -61,21 +54,18 @@ fun ListUserSimpleComponent(
                     )
                 }
 
-                // Button
                 if (button != null) {
                     button()
                 }
             }
         }
 
-        // Users Scroll
+        // User list with horizontal scroll touching the display edges
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
-
-
-            // Show all users in displayed users
             items(
                 items = displayedUsers,
                 key = { user -> user.id }
@@ -87,7 +77,6 @@ fun ListUserSimpleComponent(
         }
     }
 }
-
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
