@@ -32,20 +32,14 @@ import com.aaron.walkcore.ui.view.component.session.ListSessionOverviewComponent
 import com.aaron.walkcore.ui.view.component.session.OngoingSessionOverviewComponent
 import com.aaron.walkcore.ui.view.component.user.ListUserSimpleComponent
 
+
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController
 ) {
-    /* ==============================
-    ========== VARIABLES ==========
-    ============================== */
     val scrollState = rememberScrollState()
 
-    /* ==============================
-    ========== UI LAYOUT ==========
-    ============================== */
-    // --- Layout ---
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -53,19 +47,15 @@ fun HomeScreen(
         verticalArrangement = Arrangement.spacedBy(40.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Greeting
+        // Welcome message header
         Text(
             text = "Hello, Jermy!",
             style = MaterialTheme.typography.headlineLarge,
             textAlign = TextAlign.Start,
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         )
 
-        // Exp Bar
-        // TODO: Exp Bar @Jermy
-
-        // Step count and calories burned
+        // Activity metrics row
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -74,88 +64,86 @@ fun HomeScreen(
                 label = "Steps\nToday",
                 value = "389/2000",
                 brush = YellowToGreen,
-                modifier = Modifier
-                    .weight(1f)
+                modifier = Modifier.weight(1f)
             )
 
             LabelValueComponent(
                 label = "Steps\nCalories Burned",
                 value = "125 kcal",
                 brush = YellowToBlue,
-                modifier = Modifier
-                    .weight(1f)
+                modifier = Modifier.weight(1f)
             )
         }
 
-        // Running event
+        // Active session highlight
         OngoingSessionOverviewComponent(
             sessionOverview = SessionOverviewDummy.SessionDummyFull,
             onCardClick = {
                 val id = SessionOverviewDummy.SessionDummyFull.id
-                navController.navigate("${AppView.SESSION_DETAILS.name}/$id")
+                if (id.isNotEmpty()) {
+                    navController.navigate("${AppView.SESSION_DETAILS.name}/$id")
+                }
             },
-            onButtonClick = {
-                // TODO: Start session
-            }
+            onButtonClick = { }
         )
 
-        // Upcoming Sessions
+        // Upcoming user events list
         ListSessionOverviewComponent(
             title = "Upcoming Events",
             sessionsList = SessionOverviewDummy.allSessions,
+            onCardClick = { session ->
+                if (session.id.isNotEmpty()) {
+                    navController.navigate("${AppView.SESSION_DETAILS.name}/${session.id}")
+                }
+            },
             button = {
                 ButtonComponent(
                     label = "See Schedule",
-                    onClick = {
-                        // TODO: navController.navigate("schedule") @Ricky
-                    },
+                    onClick = { },
                     color = Blue
                 )
             }
         )
 
-        // Items You Might Like
-        // TODO: Items Overview @Jermy
-
-        // Your Friends
+        // Friends list display
         ListUserSimpleComponent(
             title = "Your Friends",
             button = {
                 ButtonComponent(
                     label = "See More",
-                    onClick = {
-                        // TODO: navigate("friends")
-                    },
+                    onClick = { },
                     color = Blue
                 )
             },
             userSimpleModels = UserDummy.AllSimpleUsers
         )
 
-        // Explore Events
+        // Global event exploration
         ListSessionOverviewComponent(
             title = "Explore Events",
             sessionsList = SessionOverviewDummy.allSessions,
             onCardClick = { session ->
-                navController.navigate("${AppView.SESSION_DETAILS.name}/${session.id}")
+                if (session.id.isNotEmpty()) {
+                    navController.navigate("${AppView.SESSION_DETAILS.name}/${session.id}")
+                }
             },
             button = {
                 ButtonComponent(
                     label = "Explore More",
-                    onClick = {
-                        // TODO: navigate("browse") @Jermy
-                    },
+                    onClick = { },
                     color = Blue
                 )
             }
         )
 
-        // From your Friends
+        // Friend activity feed
         ListSessionOverviewComponent(
             title = "From your Friends",
             sessionsList = SessionOverviewDummy.allSessions,
             onCardClick = { session ->
-                navController.navigate("${AppView.SESSION_DETAILS.name}/${session.id}")
+                if (session.id.isNotEmpty()) {
+                    navController.navigate("${AppView.SESSION_DETAILS.name}/${session.id}")
+                }
             },
             button = {
                 ButtonComponent(
@@ -166,14 +154,12 @@ fun HomeScreen(
             }
         )
 
-        Spacer(
-            modifier = Modifier
-                .height(24.dp)
-        )
+        // Bottom spacing for scroll clarity
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
-
+// Component preview configuration
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun HomeScreenPreview() {

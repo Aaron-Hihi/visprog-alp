@@ -1,3 +1,4 @@
+// Detailed session information view with data loading states
 package com.aaron.walkcore.ui.view.screen
 
 import androidx.compose.foundation.background
@@ -18,6 +19,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,44 +48,50 @@ import com.aaron.walkcore.ui.viewmodel.SessionDetailsViewModel
 
 @Composable
 fun SessionDetailsScreen(
-    sessionId: Int,
+    sessionId: String,
     viewModel: SessionDetailsViewModel = viewModel()
 ) {
     val state by viewModel.screenState.collectAsState()
 
+    // Trigger data fetch on initial composition or ID change
+    LaunchedEffect(sessionId) {
+        viewModel.fetchSessionDetails(sessionId)
+    }
+
+    // State-based UI rendering
     when (val currentState = state) {
         is SessionDetailsState.Loading -> {
-            // Loading circular
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = Green)
             }
         }
         is SessionDetailsState.Success -> {
-            SessionDetailsContent(sessionDetailsModel = currentState.data)
+            SessionDetailsContent(
+                sessionDetailsModel = currentState.data,
+                modifier = Modifier.padding(16.dp)
+            )
         }
         is SessionDetailsState.Error -> {
-            Text(text = currentState.message)
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(
+                    text = currentState.message,
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
         }
     }
 }
-
-
 
 @Composable
 fun SessionDetailsContent(
     modifier: Modifier = Modifier,
     sessionDetailsModel: SessionDetailsModel
 ) {
-    /* ==============================
-    ========== VARIABLES ==========
-    ============================== */
     var isLoadingImage by remember { mutableStateOf(true) }
     val scrollState = rememberScrollState()
 
-    /* ==============================
-    ========== UI LAYOUT ==========
-    ============================== */
-    // --- Layout ---
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -91,8 +99,8 @@ fun SessionDetailsContent(
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Image
-        Box (
+        // Hero image section with loading feedback
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f),
@@ -120,28 +128,22 @@ fun SessionDetailsContent(
             }
         }
 
-        // All text and infos
         Column(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            // Title and creator username
+            // Primary session identity
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
-                // Title
                 Text(
                     text = sessionDetailsModel.title,
                     style = MaterialTheme.typography.headlineLarge,
                     textAlign = TextAlign.Center
                 )
 
-                // Creator username
                 Text(
                     text = "By ${sessionDetailsModel.creatorUsername}",
                     style = MaterialTheme.typography.bodySmall,
@@ -149,24 +151,20 @@ fun SessionDetailsContent(
                 )
             }
 
-            // Date, time, location
-            Row (
-                modifier = Modifier
-                    .fillMaxWidth(),
+            // Key logistics: Date and Location
+            Row(
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-
-                // Date and time
-                Text (
+                Text(
                     text = sessionDetailsModel.dateTimeRange,
                     modifier = Modifier.weight(1f).padding(end = 4.dp),
                     style = MaterialTheme.typography.bodySmall,
                     textAlign = TextAlign.Start
                 )
 
-                // Location
-                Text (
+                Text(
                     text = sessionDetailsModel.locationName ?: "Remote",
                     modifier = Modifier.weight(1f).padding(start = 4.dp),
                     style = MaterialTheme.typography.bodySmall,
@@ -174,106 +172,83 @@ fun SessionDetailsContent(
                 )
             }
 
-            // Description
-            Text (
+            // Detailed session description
+            Text(
                 text = sessionDetailsModel.description,
                 style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.fillMaxWidth()
             )
 
-            // Button to join
+            // Primary user action
             ButtonComponent(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(32.dp),
-                onClick = { /*TODO*/ },
-                label = "Join Now",
-                brush = BlueToGreen,
-            )
+                    .height(48.dp),
+                onClick = { },
+                    label = "Join Now",
+                    brush = BlueToGreen,
+                    )
 
-            // --- Metadata ---
-            Spacer(
-                modifier = Modifier
-                    .height(4.dp)
-            )
+                    Spacer(modifier = Modifier.height(4.dp))
 
-            // Details headline
-            Text (
-                text = "Details",
-                style = MaterialTheme.typography.headlineMedium,
-                textAlign = TextAlign.Left,
-                modifier = Modifier
-                    .fillMaxWidth()
-            )
+                    // Metadata specifications section
+                    Text(
+                        text = "Details",
+                        style = MaterialTheme.typography.headlineMedium,
+                        textAlign = TextAlign.Left,
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Session mode, solo or remote
-                SessionDetailsMetadataComponent(
-                    key = "Step target:",
-                    value = sessionDetailsModel.stepTarget.toString()
-                )
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        SessionDetailsMetadataComponent(
+                            key = "Step target:",
+                            value = sessionDetailsModel.stepTarget.toString()
+                        )
 
-                // Session mode, solo or remote
-                SessionDetailsMetadataComponent(
-                    key = "Mode",
-                    value = sessionDetailsModel.mode.displayText
-                )
+                        SessionDetailsMetadataComponent(
+                            key = "Mode",
+                            value = sessionDetailsModel.mode.displayText
+                        )
 
-                // Session status, planned, ongoing, finished, cancelled
-                SessionDetailsMetadataComponent(
-                    key = "Status",
-                    value = sessionDetailsModel.status.displayText
-                )
+                        SessionDetailsMetadataComponent(
+                            key = "Status",
+                            value = sessionDetailsModel.status.displayText
+                        )
 
-                // Session visibility, public, friend only, invite only
-                SessionDetailsMetadataComponent(
-                    key = "Visibility",
-                    value = sessionDetailsModel.visibility.displayText
-                )
+                        SessionDetailsMetadataComponent(
+                            key = "Visibility",
+                            value = sessionDetailsModel.visibility.displayText
+                        )
 
-                // Session max participants
-                SessionDetailsMetadataComponent(
-                    key = "Max Participants",
-                    value = sessionDetailsModel.maxParticipants.toString()
-                )
-            }
+                        SessionDetailsMetadataComponent(
+                            key = "Max Participants",
+                            value = sessionDetailsModel.maxParticipants.toString()
+                        )
+                    }
 
+                    Spacer(modifier = Modifier.height(4.dp))
 
+                    // Participant list and social proof
+                    Text(
+                        text = "Participants",
+                        style = MaterialTheme.typography.headlineMedium,
+                        textAlign = TextAlign.Left,
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-            // --- Participants ---
-            Spacer(
-                modifier = Modifier
-                    .height(4.dp)
-            )
-
-            // Participants headline
-            Text (
-                text = "Participants",
-                style = MaterialTheme.typography.headlineMedium,
-                textAlign = TextAlign.Left,
-                modifier = Modifier
-                    .fillMaxWidth()
-            )
-
-            // Participants list
-            ListRowUserSimpleComponent(
-                userSimpleModels = sessionDetailsModel.currentParticipants,
-                showSteps = false,
-                maxUserShown = 3
-            )
+                    ListRowUserSimpleComponent(
+                        userSimpleModels = sessionDetailsModel.currentParticipants,
+                        showSteps = false,
+                        maxUserShown = 3
+                    )
+                }
         }
     }
-}
 
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun SessionDetailsPreview() {
-    WalkcoreTheme {
-//        SessionDetailsScreen(
-//            sessionDetailsModel = SessionDummy.SessionDetailOngoingRemoteInvite,
-//            modifier = Modifier.padding(16.dp)
-//        )
+    @Preview(showBackground = true, showSystemUi = true)
+    @Composable
+    fun SessionDetailsPreview() {
+        WalkcoreTheme {
+            // Preview logic for development
+        }
     }
-}
