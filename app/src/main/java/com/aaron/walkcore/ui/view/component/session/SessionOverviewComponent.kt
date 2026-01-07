@@ -1,5 +1,6 @@
 package com.aaron.walkcore.ui.view.component.session
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,7 +39,8 @@ fun SessionOverviewComponent(
     modifier: Modifier = Modifier,
     showDescription: Boolean = true,
     sessionOverview: SessionOverviewModel,
-    fixedHeight: Boolean = true
+    fixedHeight: Boolean = true,
+    onCardClick: () -> Unit = {}
 ) {
     /* ==============================
     ========== VARIABLES ==========
@@ -56,7 +58,8 @@ fun SessionOverviewComponent(
 
     Column(
         modifier = modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable { onCardClick },
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

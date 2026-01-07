@@ -85,7 +85,7 @@ fun AppRouting(
             modifier = Modifier.padding(innerPadding)
         ) {
             // Bottom Nav
-            composable(route = AppView.HOME.name) { HomeScreen() }
+            composable(route = AppView.HOME.name) { HomeScreen(navController = navController) }
 //            composable(route = AppView.BROWSE.name) { BrowseScreen() }
 //            composable(route = AppView.ADD_SESSION.name) { AddSessionScreen() }
 //            composable(route = AppView.SCHEDULE.name) { ScheduleScreen() }
@@ -96,7 +96,7 @@ fun AppRouting(
                 route = AppView.SESSION_DETAILS.name + "/{id}",
                 arguments = listOf()
             ) { backStackEntry ->
-                SessionDetailsScreen()
+                SessionDetailsScreen(sessionId = id)
             }
         }
     }

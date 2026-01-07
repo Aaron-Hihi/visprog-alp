@@ -18,6 +18,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,9 +30,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.aaron.walkcore.R
-import com.aaron.walkcore.data.dummy.SessionDummy
 import com.aaron.walkcore.model.session.SessionDetailsModel
 import com.aaron.walkcore.ui.theme.BlueToGreen
 import com.aaron.walkcore.ui.theme.Green
@@ -40,9 +41,36 @@ import com.aaron.walkcore.ui.theme.WalkcoreTheme
 import com.aaron.walkcore.ui.view.component.ButtonComponent
 import com.aaron.walkcore.ui.view.component.session.SessionDetailsMetadataComponent
 import com.aaron.walkcore.ui.view.component.user.ListRowUserSimpleComponent
+import com.aaron.walkcore.ui.view.state.SessionDetailsState
+import com.aaron.walkcore.ui.viewmodel.SessionDetailsViewModel
 
 @Composable
 fun SessionDetailsScreen(
+    sessionId: Int,
+    viewModel: SessionDetailsViewModel = viewModel()
+) {
+    val state by viewModel.screenState.collectAsState()
+
+    when (val currentState = state) {
+        is SessionDetailsState.Loading -> {
+            // Loading circular
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Green)
+            }
+        }
+        is SessionDetailsState.Success -> {
+            SessionDetailsContent(sessionDetailsModel = currentState.data)
+        }
+        is SessionDetailsState.Error -> {
+            Text(text = currentState.message)
+        }
+    }
+}
+
+
+
+@Composable
+fun SessionDetailsContent(
     modifier: Modifier = Modifier,
     sessionDetailsModel: SessionDetailsModel
 ) {
@@ -243,9 +271,9 @@ fun SessionDetailsScreen(
 @Composable
 fun SessionDetailsPreview() {
     WalkcoreTheme {
-        SessionDetailsScreen(
-            sessionDetailsModel = SessionDummy.SessionDetailOngoingRemoteInvite,
-            modifier = Modifier.padding(16.dp)
-        )
+//        SessionDetailsScreen(
+//            sessionDetailsModel = SessionDummy.SessionDetailOngoingRemoteInvite,
+//            modifier = Modifier.padding(16.dp)
+//        )
     }
 }

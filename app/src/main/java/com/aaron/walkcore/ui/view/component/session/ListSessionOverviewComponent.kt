@@ -2,12 +2,9 @@ package com.aaron.walkcore.ui.view.component.session
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
@@ -29,7 +26,8 @@ fun ListSessionOverviewComponent(
     modifier: Modifier = Modifier,
     title: String? = null,
     button: (@Composable () -> Unit)? = null,
-    sessionsList: List<SessionOverviewModel>
+    sessionsList: List<SessionOverviewModel>,
+    onCardClick: (SessionOverviewModel) -> Unit = {}
 ) {
 
     Column(
@@ -77,14 +75,17 @@ fun ListSessionOverviewComponent(
             ) { session ->
                 SessionOverviewRowItemComponent(
                     sessionOverview = session,
-                    showDescription = false
+                    showDescription = false,
+                    onCardClick = { onCardClick(session) }
                 )
             }
 
             // If session is empty
             if (sessionsList.isEmpty()) {
                 item {
-                    Text("No sessions found", modifier = Modifier.padding(16.dp))
+                    Text(
+                        text = "No sessions found",
+                        modifier = Modifier.padding(16.dp))
                 }
             }
         }

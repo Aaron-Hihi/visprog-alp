@@ -23,7 +23,8 @@ import com.aaron.walkcore.ui.view.component.ButtonComponent
 fun OngoingSessionOverviewComponent(
     modifier: Modifier = Modifier,
     sessionOverview: SessionOverviewModel,
-    onClick: () -> Unit
+    onCardClick: () -> Unit = {},
+    onButtonClick: () -> Unit
 ) {
     /* ==============================
     ========== UI LAYOUT ==========
@@ -46,12 +47,13 @@ fun OngoingSessionOverviewComponent(
         SessionOverviewComponent(
             showDescription = false,
             sessionOverview = sessionOverview,
-            fixedHeight = false
+            fixedHeight = false,
+            onCardClick = onCardClick
         )
 
         // Start session button
         ButtonComponent(
-            onClick = onClick,
+            onClick = onButtonClick,
             label = "Start Session",
             brush = BlueToYellow,
             modifier = Modifier
@@ -69,7 +71,7 @@ fun OngoingSessionOverviewPreview() {
     WalkcoreTheme {
         OngoingSessionOverviewComponent(
             sessionOverview = SessionOverviewDummy.SessionDummyFull,
-            onClick = {}
+            onButtonClick = {}
         )
     }
 }

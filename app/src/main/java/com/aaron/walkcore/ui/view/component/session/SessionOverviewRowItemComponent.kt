@@ -36,7 +36,8 @@ import com.aaron.walkcore.ui.theme.WalkcoreTheme
 fun SessionOverviewRowItemComponent(
     modifier: Modifier = Modifier,
     sessionOverview: SessionOverviewModel,
-    showDescription: Boolean = false
+    showDescription: Boolean = false,
+    onCardClick: () -> Unit = {}
 ) {
     val itemWidth = 280.dp
 
@@ -46,8 +47,8 @@ fun SessionOverviewRowItemComponent(
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
         ),
-        shape = RoundedCornerShape(0.dp)
-
+        shape = RoundedCornerShape(0.dp),
+        onClick = onCardClick
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),

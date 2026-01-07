@@ -102,4 +102,11 @@ object SessionDummy {
         createdAt = "2025-12-19T10:00:00Z",
         updatedAt = "2025-12-20T15:00:00Z"
     )
+
+    val allSessionDetails = listOf(
+        SessionDetailPlannedSoloPublic,
+        SessionDetailOngoingRemoteInvite,
+        SessionDetailFinishedFriendOnly,
+        SessionDetailCancelled
+    )
 }
