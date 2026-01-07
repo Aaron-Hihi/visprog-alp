@@ -26,24 +26,21 @@ fun OngoingSessionOverviewComponent(
     onCardClick: () -> Unit = {},
     onButtonClick: () -> Unit
 ) {
-    /* ==============================
-    ========== UI LAYOUT ==========
-    ============================== */
-    // --- Layout ---
+    // Container for the ongoing session card and its primary action button
     Column(
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // Title
+        // Section header for active tracking
         Text(
             text = "Running Event",
             style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Start,
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         )
-        
-        // Ongoing session
+
+        // Interactive session card
         SessionOverviewComponent(
             showDescription = false,
             sessionOverview = sessionOverview,
@@ -51,19 +48,18 @@ fun OngoingSessionOverviewComponent(
             onCardClick = onCardClick
         )
 
-        // Start session button
+        // Primary action button to begin activity
         ButtonComponent(
             onClick = onButtonClick,
             label = "Start Session",
             brush = BlueToYellow,
             modifier = Modifier
-                .height(32.dp)
+                .fillMaxWidth()
+                .height(48.dp)
                 .padding(horizontal = 32.dp)
         )
     }
-
 }
-
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
@@ -71,7 +67,8 @@ fun OngoingSessionOverviewPreview() {
     WalkcoreTheme {
         OngoingSessionOverviewComponent(
             sessionOverview = SessionOverviewDummy.SessionDummyFull,
-            onButtonClick = {}
+            onButtonClick = {},
+            onCardClick = {}
         )
     }
 }

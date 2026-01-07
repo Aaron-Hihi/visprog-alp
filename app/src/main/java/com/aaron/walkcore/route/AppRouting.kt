@@ -21,26 +21,31 @@ import androidx.navigation.navArgument
 import com.aaron.walkcore.ui.view.component.AppBottomNav
 import com.aaron.walkcore.ui.view.component.AppTopNav
 import com.aaron.walkcore.ui.view.screen.HomeScreen
+import com.aaron.walkcore.ui.view.screen.LoginScreen
 import com.aaron.walkcore.ui.view.screen.ProfileScreen
-import com.aaron.walkcore.ui.view.screen.SessionDetailsScreen
+import com.aaron.walkcore.ui.view.screen.RegisterScreen
+import com.aaron.walkcore.ui.view.screen.SessionAddScreen
+import com.aaron.walkcore.ui.view.screen.SessionDetailScreen
 
-// Enumeration for application views and icons
+// Definitions for all accessible screens and their associated icons
 enum class AppView(
     val title: String,
     val icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
 ) {
+    LOGIN(title = "Login"),
+    REGISTER(title = "Register"),
     HOME(title = "Home", icon = Icons.Filled.Home),
     BROWSE(title = "Browse", icon = Icons.Filled.Search),
-    ADD_SESSION(title = "Add Session", icon = Icons.Filled.Add),
+    CREATE_SESSION(title = "Add Session", icon = Icons.Filled.Add),
     SCHEDULE(title = "Schedule", icon = Icons.Filled.CalendarMonth),
     PROFILE(title = "Profile", icon = Icons.Filled.Person),
     SESSION_DETAILS(title = "Session Details")
 }
 
-// Data class for bottom navigation structure
+// Structure for bottom navigation bar items
 data class BottomNavItem(val view: AppView, val label: String)
 
-// Main navigation host and scaffold layout
+// Main navigation controller managing the app's backstack and layout shell
 @Composable
 fun AppRouting(
     navController: NavHostController = rememberNavController()
@@ -52,7 +57,7 @@ fun AppRouting(
     val bottomNavItems = listOf(
         BottomNavItem(view = AppView.HOME, label = "Home"),
         BottomNavItem(view = AppView.BROWSE, label = "Browse"),
-        BottomNavItem(view = AppView.ADD_SESSION, label = "Add"),
+        BottomNavItem(view = AppView.CREATE_SESSION, label = "Add"),
         BottomNavItem(view = AppView.SCHEDULE, label = "Schedule"),
         BottomNavItem(view = AppView.PROFILE, label = "Profile")
     )
@@ -63,6 +68,7 @@ fun AppRouting(
 
     Scaffold(
         topBar = {
+            // Persistent top navigation bar with back navigation support
             AppTopNav(
                 currentView = currentView,
                 canNavigateBack = navController.previousBackStackEntry != null,
@@ -70,6 +76,7 @@ fun AppRouting(
             )
         },
         bottomBar = {
+            // Conditional rendering of bottom navigation bar based on route
             val isBottomRoute = bottomNavItems.any { it.view.name == currentRoute }
             if (isBottomRoute) {
                 AppBottomNav(
@@ -82,31 +89,49 @@ fun AppRouting(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = AppView.HOME.name,
+            startDestination = AppView.LOGIN.name,
             modifier = Modifier.padding(innerPadding)
         ) {
-            // Dashboard entry point
+            // Authenticate existing users
+            composable(route = AppView.LOGIN.name) {
+                LoginScreen(navController = navController)
+            }
+
+            // Register new user accounts
+            composable(route = AppView.REGISTER.name) {
+                RegisterScreen(navController = navController)
+            }
+
+            // Main activity overview and statistics
             composable(route = AppView.HOME.name) {
                 HomeScreen(navController = navController)
             }
 
-            // User profile settings
+            // User account settings and profile information
             composable(route = AppView.PROFILE.name) {
                 ProfileScreen()
             }
 
-            // Session details with dynamic string ID parameter
+            // Form to launch and host a new walking session
+            composable(route = AppView.CREATE_SESSION.name) {
+                SessionAddScreen(navController = navController)
+            }
+
+            // Detailed view of a specific session with ID parameter
             composable(
-                route = "${AppView.SESSION_DETAILS.name}/{id}",
+                route = "${AppView.SESSION_DETAILS.name}/{sessionId}",
                 arguments = listOf(
-                    navArgument("id") {
+                    navArgument("sessionId") {
                         type = NavType.StringType
                         nullable = false
                     }
                 )
             ) { backStackEntry ->
-                val sessionId = backStackEntry.arguments?.getString("id") ?: ""
-                SessionDetailsScreen(sessionId = sessionId)
+                val sessionId = backStackEntry.arguments?.getString("sessionId") ?: ""
+                SessionDetailScreen(
+                    sessionId = sessionId,
+                    navController = navController
+                )
             }
         }
     }

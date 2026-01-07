@@ -42,31 +42,20 @@ fun SessionOverviewComponent(
     fixedHeight: Boolean = true,
     onCardClick: () -> Unit = {}
 ) {
-    /* ==============================
-    ========== VARIABLES ==========
-    ============================== */
     var isLoadingImage by remember { mutableStateOf(true) }
-
-    /* ==============================
-    ========== UI LAYOUT ==========
-    ============================== */
-    // --- View Vars ---
     val fixedTextContentHeight = 150.dp
 
-
-    // --- Layout ---
-
+    // Root container with fixed click listener execution
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onCardClick },
+            .clickable { onCardClick() }, // Menambahkan () agar fungsi dipanggil
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Image
+        // Session thumbnail with loading state
         Box (
-            modifier = Modifier
-                .aspectRatio(1f),
+            modifier = Modifier.aspectRatio(1f),
             contentAlignment = Alignment.Center
         ) {
             AsyncImage(
@@ -89,31 +78,27 @@ fun SessionOverviewComponent(
             }
         }
 
-        // All text and infos
+        // Information text container
         Column(
             modifier = if (fixedHeight) Modifier
-                    .height(fixedTextContentHeight)
-                    .fillMaxWidth()
-                else Modifier
-                    .fillMaxWidth(),
+                .height(fixedTextContentHeight)
+                .fillMaxWidth()
+            else Modifier
+                .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            // Title and creator username
+            // Title and creator identification
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
-                // Title
                 Text(
                     text = sessionOverview.title,
                     style = MaterialTheme.typography.headlineMedium,
                     textAlign = TextAlign.Center
                 )
 
-                // Creator username
                 Text(
                     text = "By ${sessionOverview.creatorUsername}",
                     style = MaterialTheme.typography.bodySmall,
@@ -121,15 +106,12 @@ fun SessionOverviewComponent(
                 )
             }
 
-            // Date, time, location
+            // Session logistics: Date, Time, and Location
             Row (
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-
-                // Date and time
                 Text (
                     text = sessionOverview.dateTimeRange,
                     modifier = Modifier.weight(1f).padding(end = 4.dp),
@@ -139,7 +121,6 @@ fun SessionOverviewComponent(
                     textAlign = TextAlign.Start
                 )
 
-                // Location
                 Text (
                     text = sessionOverview.locationName ?: "Remote",
                     modifier = Modifier.weight(1f).padding(start = 4.dp),
@@ -150,20 +131,19 @@ fun SessionOverviewComponent(
                 )
             }
 
-            // Description
+            // Optional description text block
             if (showDescription) {
                 Text (
                     text = sessionOverview.description,
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 7,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }
     }
-
 }
-
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

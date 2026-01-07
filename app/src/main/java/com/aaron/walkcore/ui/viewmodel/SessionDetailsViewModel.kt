@@ -1,52 +1,74 @@
 package com.aaron.walkcore.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import com.aaron.walkcore.data.dummy.SessionDummy
-import com.aaron.walkcore.ui.view.state.SessionDetailsState
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.aaron.walkcore.WalkcoreApplication
+import com.aaron.walkcore.data.dto.SessionDTO
+import com.aaron.walkcore.data.repository.WalkcoreRepository
+import com.aaron.walkcore.model.session.SessionOverviewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SessionDetailsViewModel : ViewModel() {
-    /* ==============================
-    ========= GETTER SETTER =========
-    ============================== */
-    // Screen state (empty, found, not found)
-    private val _screenState = MutableStateFlow<SessionDetailsState>(SessionDetailsState.Loading)
-    val screenState: StateFlow<SessionDetailsState> = _screenState
+// UI state for managing session detail data and loading status
+data class SessionDetailUiState(
+    val isLoading: Boolean = false,
+    val sessionData: SessionOverviewModel? = null,
+    val error: String? = null
+)
 
-    // Button
+class SessionDetailViewModel(private val repository: WalkcoreRepository) : ViewModel() {
 
-    /* ==============================
-    ============== INIT =============
-    ============================== */
+    private val _uiState = MutableStateFlow(SessionDetailUiState())
+    val uiState: StateFlow<SessionDetailUiState> = _uiState.asStateFlow()
 
-
-    /* ==============================
-    =========== FUNCTIONS ===========
-    ============================== */
-
-    // Fetch session details
-    fun fetchSessionDetails(sessionId: String?) {
-        if (sessionId.isNullOrEmpty()) {
-            _screenState.value = SessionDetailsState.Error("Session not found")
-            return
-        }
-
+    // Fetches session data from network and maps to UI model
+    fun getSessionDetail(sessionId: String) {
         viewModelScope.launch {
-            _screenState.value = SessionDetailsState.Loading
-
+            _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                val result = SessionDummy.allSessionDetails.find { it.id == sessionId }
+                val dto = repository.getSessionDetail(sessionId)
+                val model = dto.toUIModel()
 
-                if (result != null) {
-                    _screenState.value = SessionDetailsState.Success(result)
-                } else {
-                    _screenState.value = SessionDetailsState.Error("Session not found")
+                _uiState.update {
+                    it.copy(sessionData = model, isLoading = false)
                 }
             } catch (e: Exception) {
-                _screenState.value = SessionDetailsState.Error(e.message ?: "An error occurerd")
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = e.localizedMessage ?: "Failed to load session"
+                    )
+                }
+            }
+        }
+    }
+
+    // Transform raw DTO to presentation model
+    private fun SessionDTO.toUIModel(): SessionOverviewModel {
+        return SessionOverviewModel(
+            id = this.id,
+            title = this.title,
+            creatorUsername = "Organizer",
+            description = this.description,
+            dateTimeRange = "${this.startTime} - ${this.endTime}",
+            imageUrl = null,
+            locationName = if (this.mode == "REMOTE") "Remote" else "On-site"
+        )
+    }
+
+    // Dependency injection factory
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val application = (this[APPLICATION_KEY] as WalkcoreApplication)
+                SessionDetailViewModel(application.container.walkcoreRepository)
             }
         }
     }

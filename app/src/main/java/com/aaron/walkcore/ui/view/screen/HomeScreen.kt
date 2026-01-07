@@ -1,6 +1,7 @@
 package com.aaron.walkcore.ui.view.screen
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,18 +11,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.aaron.walkcore.data.dummy.SessionOverviewDummy
-import com.aaron.walkcore.data.dummy.UserDummy
 import com.aaron.walkcore.route.AppView
 import com.aaron.walkcore.ui.theme.Blue
 import com.aaron.walkcore.ui.theme.WalkcoreTheme
@@ -29,120 +33,125 @@ import com.aaron.walkcore.ui.theme.YellowToBlue
 import com.aaron.walkcore.ui.theme.YellowToGreen
 import com.aaron.walkcore.ui.view.component.ButtonComponent
 import com.aaron.walkcore.ui.view.component.LabelValueComponent
-import com.aaron.walkcore.ui.view.component.session.ListSessionOverviewComponent
 import com.aaron.walkcore.ui.view.component.session.OngoingSessionOverviewComponent
-import com.aaron.walkcore.ui.view.component.user.ListUserSimpleComponent
+import com.aaron.walkcore.ui.viewmodel.HomeViewModel
 
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    navController: NavHostController
+    navController: NavHostController,
+    viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Factory)
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     val scrollState = rememberScrollState()
 
-    // Main scroll container without global horizontal padding to allow lists to reach edges
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState),
-        verticalArrangement = Arrangement.spacedBy(60.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Welcome message with specific padding
-        Text(
-            text = "Hello, Jermy!",
-            style = MaterialTheme.typography.headlineLarge,
-            textAlign = TextAlign.Start,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-        )
+    // Data Fetching Logic
+    LaunchedEffect(Unit) {
+        viewModel.refreshHomeData()
+    }
 
-        // Statistics row with specific padding
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            LabelValueComponent(
-                label = "Steps\nToday",
-                value = "389/2000",
-                brush = YellowToGreen,
-                modifier = Modifier.weight(1f)
+    // Main UI State Switcher
+    Box(modifier = modifier.fillMaxSize()) {
+        if (uiState.isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center),
+                color = Blue
             )
-
-            LabelValueComponent(
-                label = "Steps\nCalories Burned",
-                value = "125 kcal",
-                brush = YellowToBlue,
-                modifier = Modifier.weight(1f)
+        } else if (uiState.error != null) {
+            Text(
+                text = uiState.error!!,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(16.dp),
+                textAlign = TextAlign.Center
             )
-        }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(40.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Header Section
+                Text(
+                    text = "Hello, ${uiState.homeData?.profile?.username ?: "User"}!",
+                    style = MaterialTheme.typography.headlineLarge,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                )
 
-        // Feature card for active sessions
-        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-            OngoingSessionOverviewComponent(
-                sessionOverview = SessionOverviewDummy.SessionDummyFull,
-                onCardClick = {
-                    val id = SessionOverviewDummy.SessionDummyFull.id
-                    if (id.isNotEmpty()) {
-                        navController.navigate("${AppView.SESSION_DETAILS.name}/$id")
+                // User Performance Statistics
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    LabelValueComponent(
+                        label = "Steps\nToday",
+                        value = "${uiState.homeData?.stats?.totalSteps ?: 0}/2000",
+                        brush = YellowToGreen,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    LabelValueComponent(
+                        label = "Calories\nBurned",
+                        value = "${uiState.homeData?.stats?.totalCaloriesBurned ?: 0} kcal",
+                        brush = YellowToBlue,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                // Active Participation Section
+                uiState.activeSession?.let { sessionModel ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        // Component Title
+                        Text(
+                            text = "Current Activity",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        // Component just takes the model provided by ViewModel
+                        OngoingSessionOverviewComponent(
+                            sessionOverview = sessionModel,
+                            onCardClick = {
+                                navController.navigate("${AppView.SESSION_DETAILS.name}/${sessionModel.id}")
+                            },
+                            onButtonClick = {
+                                navController.navigate("${AppView.SESSION_DETAILS.name}/${sessionModel.id}")
+                            }
+                        )
                     }
-                },
-                onButtonClick = { }
-            )
+                }
+
+                // Call to Action Section
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    ButtonComponent(
+                        label = "Create New Session",
+                        onClick = {
+                            // Navigation to be implemented in AppRouting
+                        },
+                        color = Blue
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+            }
         }
-
-        // Horizontal lists: Title/Button stay padded, scrollable content hits edges
-        ListSessionOverviewComponent(
-            title = "Upcoming Events",
-            sessionsList = SessionOverviewDummy.allSessions,
-            onCardClick = { session ->
-                if (session.id.isNotEmpty()) {
-                    navController.navigate("${AppView.SESSION_DETAILS.name}/${session.id}")
-                }
-            },
-            button = {
-                ButtonComponent(label = "See Schedule", onClick = { }, color = Blue)
-            }
-        )
-
-        ListUserSimpleComponent(
-            title = "Your Friends",
-            button = {
-                ButtonComponent(label = "See More", onClick = { }, color = Blue)
-            },
-            userSimpleModels = UserDummy.AllSimpleUsers
-        )
-
-        ListSessionOverviewComponent(
-            title = "Explore Events",
-            sessionsList = SessionOverviewDummy.allSessions,
-            onCardClick = { session ->
-                if (session.id.isNotEmpty()) {
-                    navController.navigate("${AppView.SESSION_DETAILS.name}/${session.id}")
-                }
-            },
-            button = {
-                ButtonComponent(label = "Explore More", onClick = { }, color = Blue)
-            }
-        )
-
-        ListSessionOverviewComponent(
-            title = "From your Friends",
-            sessionsList = SessionOverviewDummy.allSessions,
-            onCardClick = { session ->
-                if (session.id.isNotEmpty()) {
-                    navController.navigate("${AppView.SESSION_DETAILS.name}/${session.id}")
-                }
-            },
-            button = {
-                ButtonComponent(label = "Explore More", onClick = {}, color = Blue)
-            }
-        )
-
-        // Bottom spacer for scroll clearance
-        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
